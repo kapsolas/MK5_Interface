@@ -1,30 +1,106 @@
-<?php include_once('/pineapple/includes/api/tile_functions.php'); ?>
 <?php
+namespace pineapple;
+
+
+include_once('/pineapple/includes/api/tile_functions.php');
 echo "MK5 Karma ";
 if (get_karma_status()) {
-echo "<font color=\"lime\"><b>Enabled</b></font>.&nbsp; | <a href='#sys/karma/action/stop_karma/karma_reload_tile'><b>Stop</b></a><br />";
-} else { echo "<font color=\"red\"><b>Disabled</b></font>. | <a href='#sys/karma/action/start_karma/karma_reload_tile'><b>Start</b></a><br />"; }
+    echo "<font color=\"lime\">Enabled</font>.&nbsp; | <a href='#sys/pineap/action/stop_karma/pineap_reload_tile'>Stop</a><br />";
+} else {
+    echo "<font color=\"red\">Disabled</font>. | <a href='#sys/pineap/action/start_karma/pineap_reload_tile'>Start</a><br />"; 
+}
 
 echo "Autostart ";
 if (get_autostart_status()) {
-echo "<font color=\"lime\"><b>Enabled</b></font>.&nbsp; | <a href='#sys/karma/action/stop_autostart/karma_reload_tile'><b>Disable</b></a><br />";
-} else { echo "<font color=\"red\"><b>Disabled</b></font>. | <a href='#sys/karma/action/start_autostart/karma_reload_tile'><b>Enable</b></a><br />"; }
-
-
-
-function get_karma_status(){
-  if ( exec("hostapd_cli -p /var/run/hostapd-phy0 karma_get_state | tail -1") == "ENABLED" ){
-    return true;
-  }
-  return false;
+    echo "<font color=\"lime\">Enabled</font>.&nbsp; | <a href='#sys/pineap/action/stop_autostart/pineap_reload_tile'>Disable</a><br />";
+} else {
+    echo "<font color=\"red\">Disabled</font>. | <a href='#sys/pineap/action/start_autostart/pineap_reload_tile'>Enable</a><br />"; 
 }
 
-function get_autostart_status(){
-  if(exec('ls /etc/rc.d/ | grep karma') == ''){
+echo "<br /><br />";
+
+
+echo "PineAP ";
+if (get_pineap_status()) {
+    echo "<span class='success'>Enabled</span>. | <a href='#sys/pineap/action/stop_pineap/pineap_reload_tile'>Disable</a><br />";
+} else {
+    echo "<span class='error'>Disabled</span>. | <a href='#sys/pineap/action/start_pineap/pineap_reload_tile'>Enable</a><br />";
+}
+
+echo "Dogma ";
+if (get_beaconer_status()) {
+    echo "<span class='success' title='Responsible for sending out the beacons in your SSID list (targeted or to broadcast)'>Enabled</span>. | <a href='#sys/pineap/action/stop_beaconer/pineap_reload_tile'>Disable</a><br />";
+} else {
+    echo "<span class='error'   title='Responsible for sending out the beacons in your SSID list (targeted or to broadcast)'>Disabled</span>. &nbsp;| <a href='#sys/pineap/action/start_beaconer/pineap_reload_tile'>Enable</a><br />";
+}
+
+echo "Beacon Response ";
+if (get_responder_status()) {
+    echo "<span class='success' title='Follows up any probe request with a number of beacons'>Enabled</span>. | <a href='#sys/pineap/action/stop_responder/pineap_reload_tile'>Disable</a><br />";
+} else {
+    echo "<span class='error'   title='Follows up any probe request with a number of beacons'>Disabled</span>. | <a href='#sys/pineap/action/start_responder/pineap_reload_tile'>Enable</a><br />";
+}
+
+echo "Auto Harvester ";
+if (get_harvester_status()) {
+    echo "<span class='success' title='Collects all SSIDs which can then be used for Dogma'>Enabled</span>. | <a href='#sys/pineap/action/stop_harvester/pineap_reload_tile'>Disable</a><br />";
+} else {
+    echo "<span class='error'   title='Collects all SSIDs which can then be used for Dogma'>Disabled</span>. &nbsp;| <a href='#sys/pineap/action/start_harvester/pineap_reload_tile'>Enable</a><br />";
+}
+
+
+function get_beaconer_status()
+{
+    $pineAP = new PineAP();
+    if ($pineAP->isBeaconerRunning()) {
+        return true;
+    }
     return false;
-  }else{
-    return true;
-  }
+}
+
+function get_harvester_status()
+{
+    $pineAP = new PineAP();
+    if ($pineAP->isHarvesterRunning()) {
+        return true;
+    }
+    return false;
+}
+
+function get_responder_status()
+{
+    $pineAP = new PineAP();
+    if ($pineAP->isResponderRunning()) {
+        return true;
+    }
+    return false;
+}
+
+function get_pineap_status()
+{
+    exec("pgrep pinejector", $pids);
+    if (empty($pids)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+function get_karma_status()
+{
+    if (exec("hostapd_cli -p /var/run/hostapd-phy0 karma_get_state | tail -1") == "ENABLED") {
+        return true;
+    }
+    return false;
+}
+
+function get_autostart_status()
+{
+    if (exec('ls /etc/rc.d/ | grep karma') == '') {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 
@@ -32,9 +108,9 @@ function get_autostart_status(){
 
 <script type="text/javascript">
 
-  var karma_log_refresh = 0;
+    var karma_log_refresh = 0;
 
-  function karma_reload_tile(){
-    refresh_small('karma', 'sys');
-  }
+    function pineap_reload_tile(){
+        refresh_small('pineap', 'sys');
+    }
 </script>
